@@ -70,8 +70,8 @@ public class ServiceManager {
                         .appendQueryParameter("course_id", courseId)
                         .appendQueryParameter("username", loginPrefs.getUsername())
                         .appendQueryParameter("depth", "all")
-                        .appendQueryParameter("requested_fields", "graded,format,student_view_multi_device")
-                        .appendQueryParameter("student_view_data", "video,discussion")
+                        .appendQueryParameter("requested_fields", "graded,format,student_view_multi_device,student_view_data,type")
+                        .appendQueryParameter("student_view_data", "video,discussion,scorm")
                         .appendQueryParameter("block_counts", "video")
                         .appendQueryParameter("nav_depth", "3")
                         .toString();
@@ -187,6 +187,10 @@ public class ServiceManager {
 
     public String downloadTranscript(String url) throws Exception {
         return api.downloadTranscript(url);
+    }
+
+    public String downloadScorm(String url, String file) throws Exception {
+        return api.downloadScorm(url,file);
     }
 
     public SyncLastAccessedSubsectionResponse syncLastAccessedSubsection(String courseId, String lastVisitedModuleId) throws Exception {

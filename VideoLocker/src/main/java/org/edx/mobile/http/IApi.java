@@ -34,6 +34,9 @@ public interface IApi {
     String downloadTranscript(String url)
             throws Exception;
 
+    String downloadScorm(String url,String file)
+            throws Exception;
+
     SyncLastAccessedSubsectionResponse syncLastAccessedSubsection(String courseId,
                                                                   String lastVisitedModuleId) throws Exception;
 

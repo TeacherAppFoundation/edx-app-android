@@ -31,6 +31,8 @@ import org.edx.mobile.util.DateUtil;
 import org.edx.mobile.util.NetworkUtil;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpCookie;
@@ -167,6 +169,32 @@ public class RestApiManager implements IApi {
         return gson.fromJson(response.body().charStream(), t.getType());
     }
 
+    @Override
+    public String downloadScorm(String url, String file) throws Exception {
+        if (url != null) {
+            Request.Builder builder = new Request.Builder().url(url);
+            if (NetworkUtil.isConnected(context)) {
+                builder.cacheControl(CacheControl.FORCE_NETWORK);
+            }
+            Request request = builder.build();
+
+            Response response = oauthBasedClient.newCall(request).execute();
+            if (!response.isSuccessful()) throw new Exception("Unexpected code " + response);
+
+            response = getClient().newCall(request).execute();
+
+            InputStream is = response.body().byteStream();
+            FileOutputStream fos = new FileOutputStream(new File(file));
+            int inByte;
+            while((inByte = is.read()) != -1)
+                fos.write(inByte);
+            is.close();
+            fos.close();
+
+            return file;
+        }
+        return null;
+    }
 
     @Override
     public String downloadTranscript(String url) throws Exception {
