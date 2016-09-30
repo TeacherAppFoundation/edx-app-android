@@ -442,6 +442,21 @@ public class Api implements IApi {
         return res;
     }
 
+    @Override
+    public String downloadScorm(String url, String file)
+            throws Exception {
+        if (url != null) {
+            try {
+                if (NetworkUtil.isConnected(this.context)) {
+                    String str = http.download(url,file, null).body;
+                    return str;
+                }
+            } catch (Exception ex) {
+                logger.error(ex);
+            }
+        }
+        return null;
+    }
 
     @Override
     public String downloadTranscript(String url)

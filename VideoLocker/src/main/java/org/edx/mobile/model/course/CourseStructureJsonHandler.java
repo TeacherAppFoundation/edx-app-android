@@ -52,7 +52,10 @@ public class CourseStructureJsonHandler {
                 return context.deserialize(jsonObject, VideoData.class);
             } else if (jsonObject.has("topic_id")) {
                 return context.deserialize(jsonObject, DiscussionData.class);
+            } else if (jsonObject.has("scorm_data")) {
+                return context.deserialize(jsonObject, ScormData.class);
             }
+
             return new BlockData();
         }
     }

@@ -189,6 +189,11 @@
             android:theme="@style/AppTheme.NoActionBar.TranslucentStatusBar"></activity>
 
         <activity
+            android:name=".view.CourseScormViewActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="Scorm" />
+
+        <activity
             android:name="org.edx.mobile.view.VideoListActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait" />

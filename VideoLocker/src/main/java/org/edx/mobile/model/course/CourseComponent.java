@@ -7,7 +7,6 @@ import org.edx.mobile.base.MainApplication;
 import org.edx.mobile.logger.Logger;
 import org.edx.mobile.model.Filter;
 import org.edx.mobile.model.api.IPathNode;
-import org.edx.mobile.module.storage.IStorage;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -230,6 +229,24 @@ public class CourseComponent implements IBlock, IPathNode {
             }
         }
         return (List<VideoBlockModel>)(List)videos;
+    }
+
+    public List<ScormBlockModel> getScorms(){
+        List<CourseComponent> videos = new ArrayList<>();
+        fetchAllLeafComponents(videos, EnumSet.of(BlockType.SCORM));
+        // Confirm that these are actually VideoBlockModel instances.
+        // This is necessary because if for some reason the data is null,
+        // then the block is represented as an HtmlBlockModel, even if
+        // the type is video. This should not actually happen in practice
+        // though; this is just a safeguard to handle that unlikely case.
+        for (Iterator<CourseComponent> videosIterator = videos.iterator();
+             videosIterator.hasNext();) {
+            CourseComponent videoComponent = videosIterator.next();
+            if (!(videoComponent instanceof ScormBlockModel)) {
+                videosIterator.remove();
+            }
+        }
+        return (List<ScormBlockModel>)(List)videos;
     }
 
     /**

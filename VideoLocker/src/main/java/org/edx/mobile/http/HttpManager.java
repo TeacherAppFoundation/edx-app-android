@@ -37,6 +37,9 @@ import org.edx.mobile.util.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpCookie;
@@ -99,6 +102,51 @@ public class HttpManager {
         client.getConnectionManager().shutdown();
         HttpResult result = new HttpResult();
         result.body = strRes;
+        result.statusCode = response.getStatusLine().getStatusCode();
+        return result;
+    }
+
+    public HttpResult download(String urlWithAppendedParams,String filePath, Bundle headers)
+            throws ParseException, ClientProtocolException, IOException {
+        final DefaultHttpClient client = newClient();
+
+        HttpGet get = new HttpGet(urlWithAppendedParams);
+        AndroidHttpClient.modifyRequestToAcceptGzipResponse(get);
+
+        // allow redirects
+        HttpClientParams.setRedirecting(client.getParams(), true);
+        HttpClientParams.setRedirecting(get.getParams(), true);
+
+        // set request headers
+        if (headers != null) {
+            for (String key : headers.keySet()) {
+                logger.debug(key + ": " + headers.getString(key));
+                get.setHeader(key, headers.getString(key));
+            }
+        }
+
+        HttpResponse response = client.execute(get);
+
+        logger.debug("StatusCode for get request= " + response.getStatusLine().getStatusCode());
+
+        InputStream is = response.getEntity().getContent();
+        BufferedInputStream zis = new BufferedInputStream(is);
+        FileOutputStream fout = new FileOutputStream(new File(filePath));
+
+        byte[] buffer = new byte[4096];
+        int count;
+
+        while ((count = zis.read(buffer)) != -1)
+        {
+            fout.write(buffer, 0, count);
+        }
+        zis.close();
+        fout.close();
+
+
+        client.getConnectionManager().shutdown();
+        HttpResult result = new HttpResult();
+        result.body = filePath;
         result.statusCode = response.getStatusLine().getStatusCode();
         return result;
     }
