@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 import org.edx.mobile.interfaces.SectionItemInterface;
 import org.edx.mobile.logger.Logger;
 import org.edx.mobile.model.Filter;
+import org.edx.mobile.model.course.ScormBlockModel;
 import org.edx.mobile.model.api.IPathNode;
 import org.edx.mobile.model.api.LectureModel;
 import org.edx.mobile.model.api.SectionEntry;
@@ -22,6 +23,7 @@ import org.edx.mobile.model.course.DiscussionData;
 import org.edx.mobile.model.course.HasDownloadEntry;
 import org.edx.mobile.model.course.HtmlBlockModel;
 import org.edx.mobile.model.course.IBlock;
+import org.edx.mobile.model.course.ScormData;
 import org.edx.mobile.model.course.VideoBlockModel;
 import org.edx.mobile.model.course.VideoData;
 import org.edx.mobile.model.course.VideoInfo;
@@ -104,7 +106,9 @@ public class CourseManager {
                 new VideoBlockModel(block, parent);
             } else if (BlockType.DISCUSSION == block.type && block.data instanceof DiscussionData) {
                 new DiscussionBlockModel(block, parent);
-            } else { //everything else.. we fallback to html component
+            } else if (BlockType.SCORM == block.type && block.data instanceof ScormData) {
+                new ScormBlockModel(block, parent);
+            }else { //everything else.. we fallback to html component
                 new HtmlBlockModel(block, parent);
             }
         }

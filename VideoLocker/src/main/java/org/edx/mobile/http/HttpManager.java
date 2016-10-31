@@ -1,8 +1,13 @@
 package org.edx.mobile.http;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.http.AndroidHttpClient;
 import android.os.Bundle;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -38,6 +43,9 @@ import org.edx.mobile.util.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpCookie;
@@ -48,7 +56,9 @@ import java.util.List;
 @Singleton
 @Deprecated // Deprecated because this uses org.apache.http, which is itself deprecated
 public class HttpManager {
+
     protected final Logger logger = new Logger(getClass().getName());
+    private  boolean isCanceled;
 
     Context context;
 
@@ -102,6 +112,85 @@ public class HttpManager {
         result.body = strRes;
         result.statusCode = response.getStatusLine().getStatusCode();
         return result;
+    }
+
+    public HttpResult download(String urlWithAppendedParams,String filePath, Bundle headers)
+            throws ParseException, ClientProtocolException, IOException {
+        final DefaultHttpClient client = newClient();
+
+         isCanceled = false;
+
+        BroadcastReceiver scormCancelReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                isCanceled =true;
+            }
+        };
+
+       LocalBroadcastManager.getInstance(context).registerReceiver(scormCancelReceiver, new IntentFilter("org.edx.mobile.scormCancel"));
+
+        HttpGet get = new HttpGet(urlWithAppendedParams);
+        AndroidHttpClient.modifyRequestToAcceptGzipResponse(get);
+
+        // allow redirects
+        HttpClientParams.setRedirecting(client.getParams(), true);
+        HttpClientParams.setRedirecting(get.getParams(), true);
+
+        // set request headers
+        if (headers != null) {
+            for (String key : headers.keySet()) {
+                logger.debug(key + ": " + headers.getString(key));
+                get.setHeader(key, headers.getString(key));
+            }
+        }
+
+        HttpResponse response = client.execute(get);
+
+        logger.debug("StatusCode for get request= " + response.getStatusLine().getStatusCode());
+
+        InputStream is = response.getEntity().getContent();
+        BufferedInputStream zis = new BufferedInputStream(is);
+        FileOutputStream fout = new FileOutputStream(new File(filePath));
+        long lenghtOfFile = response.getEntity().getContentLength();
+
+        byte[] buffer = new byte[4096];
+        int count;
+        long total = 0;
+
+        while ((count = zis.read(buffer)) != -1)
+        {
+            if(isCanceled){
+                zis.close();
+                return null;
+            }
+            total += count;
+
+            if (lenghtOfFile > 0) {
+                    String progress = ("" + (int) ((total * 100) / lenghtOfFile));
+                if(Integer.parseInt(progress) <= 99){
+                    Intent intent = new Intent("org.edx.mobile.scorm");
+                    intent.putExtra("Progress", progress);
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                }
+                fout.write(buffer, 0, count);
+            }
+        }
+        zis.close();
+        fout.close();
+
+        client.getConnectionManager().shutdown();
+        HttpResult result = new HttpResult();
+        result.body = filePath;
+        result.statusCode = response.getStatusLine().getStatusCode();
+
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(scormCancelReceiver);
+
+        if(isCanceled){
+            new File(filePath).delete();
+            return null;
+        }else {
+            return result;
+        }
     }
 
     /**

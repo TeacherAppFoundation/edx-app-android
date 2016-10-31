@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
+import org.edx.mobile.model.course.ScormBlockModel;
 import org.edx.mobile.model.api.EnrolledCoursesResponse;
 import org.edx.mobile.model.course.BlockType;
 import org.edx.mobile.model.course.CourseComponent;
@@ -16,6 +17,7 @@ import org.edx.mobile.view.CourseUnitDiscussionFragment;
 import org.edx.mobile.view.CourseUnitEmptyFragment;
 import org.edx.mobile.view.CourseUnitFragment;
 import org.edx.mobile.view.CourseUnitMobileNotSupportedFragment;
+import org.edx.mobile.view.CourseUnitMobileScormFragment;
 import org.edx.mobile.view.CourseUnitOnlyOnYoutubeFragment;
 import org.edx.mobile.view.CourseUnitVideoFragment;
 import org.edx.mobile.view.CourseUnitWebViewFragment;
@@ -66,7 +68,9 @@ public class CourseUnitPagerAdapter extends FragmentStatePagerAdapter {
             unitFragment = CourseUnitOnlyOnYoutubeFragment.newInstance(unit);
         } else if (config.isDiscussionsEnabled() && unit instanceof DiscussionBlockModel) {
             unitFragment = CourseUnitDiscussionFragment.newInstance(unit, courseData);
-        } else if (!unit.isMultiDevice()) {
+        } else if ( unit instanceof ScormBlockModel) {
+            unitFragment = CourseUnitMobileScormFragment.newInstance(unit);
+        }  else if (!unit.isMultiDevice()) {
             unitFragment = CourseUnitMobileNotSupportedFragment.newInstance(unit);
         } else if (unit.getType() != BlockType.VIDEO &&
                 unit.getType() != BlockType.HTML &&

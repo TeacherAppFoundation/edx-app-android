@@ -51,6 +51,7 @@ public class CourseOutlineFragment extends BaseFragment {
     private TaskProcessCallback taskProcessCallback;
     private EnrolledCoursesResponse courseData;
     private String courseComponentId;
+    private CourseComponent component;
 
 
     @Inject
@@ -133,6 +134,7 @@ public class CourseOutlineFragment extends BaseFragment {
         if ( courseData == null )
             return;
         CourseComponent courseComponent = getCourseComponent();
+        component = courseComponent;
         adapter.setData(courseComponent);
         updateMessageView(view);
     }

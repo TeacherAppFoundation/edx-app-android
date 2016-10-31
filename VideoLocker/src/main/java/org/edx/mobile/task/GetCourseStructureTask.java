@@ -27,10 +27,10 @@ Task<CourseComponent> {
         long curTime = new Date().getTime();
         OkHttpUtil.REQUEST_CACHE_TYPE useCacheType = OkHttpUtil.REQUEST_CACHE_TYPE.PREFER_CACHE;
         //if last fetch happened over one hour ago, re-fetch data
-        if ( lastFetchTime + 3600 * 1000 < curTime ){
+//        if ( lastFetchTime + 3600 * 1000 < curTime ){
             useCacheType =  OkHttpUtil.REQUEST_CACHE_TYPE.IGNORE_CACHE;;
             prefManager.setLastCourseStructureFetch(courseId, curTime);
-        }
+//        }
         return environment.getServiceManager().getCourseStructure(courseId, useCacheType);
     }
 }
