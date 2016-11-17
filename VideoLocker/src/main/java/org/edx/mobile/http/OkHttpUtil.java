@@ -1,18 +1,20 @@
-package org.edx.mobile.http;
+package  org.edx.mobile.http;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 
-import org.edx.mobile.BuildConfig;
-import org.edx.mobile.R;
+
 
 import java.io.File;
 import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import org.edx.mobile.BuildConfig;
+import org.edx.mobile.R;
 import okhttp3.Cache;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
@@ -31,6 +33,7 @@ public class OkHttpUtil {
 
 
     private static final int cacheSize = 10 * 1024 * 1024; // 10 MiB
+    private static final int timeout = 30;//seconds
 
     public static OkHttpClient getClient(@NonNull Context context) {
         return getClient(context, false);
@@ -42,6 +45,8 @@ public class OkHttpUtil {
 
     private static OkHttpClient getClient(@NonNull Context context, boolean isOAuthBased) {
         final OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        builder.connectTimeout(timeout, TimeUnit.SECONDS);
+        builder.readTimeout(timeout, TimeUnit.SECONDS);
         final File cacheDirectory = new File(context.getFilesDir(), "http-cache");
         if (!cacheDirectory.exists()) {
             cacheDirectory.mkdirs();
